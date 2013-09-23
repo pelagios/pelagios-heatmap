@@ -12,46 +12,22 @@
     <script type="text/javascript" src="heatmap-js/heatmap.js"></script>
     <script type="text/javascript" src="heatmap-js/heatmap-leaflet.js"></script>
     <script type="text/javascript" src="places.json" charset="utf-8"></script>
+    <script type="text/javascript" src="pelagios-heatmap.js" charset="utf-8"></script>
     <script type="text/javascript" charset="utf-8">
-      console.log(testData.data.length);
       $(function() {
-        /*
-        var baseLayer = L.tileLayer('http://{s}.tile.osm.org/{z}/{x}/{y}.png', {
-          attribution: '&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
-        });
-        */
-
         var baseLayer = L.tileLayer('http://pelagios.dme.ait.ac.at/tilesets/imperium//{z}/{x}/{y}.png', {
           attribution: 'Tiles: <a href="http://pelagios.dme.ait.ac.at/maps/greco-roman/about.html">Pelagios</a>, 2012; Data: NASA, OSM, Pleiades, DARMC',
         });
-
-        var heatmapLayer = L.TileLayer.heatMap({
-          radius: 12,
-          opacity: 0.8,
-          gradient: {
-            0.45: "rgb(0,0,255)",
-            0.55: "rgb(0,255,255)",
-            0.65: "rgb(0,255,0)",
-            0.95: "yellow",
-            1.0: "rgb(255,0,0)"
-          }
-        });
-
-        heatmapLayer.addData(testData.data);
-
-        var overlayMaps = {
-          'Heatmap': heatmapLayer
-        };
  
         var map = new L.Map('map', {
           center: new L.LatLng(41.893588, 12.488022),
           zoom: 5,
-          layers: [baseLayer, heatmapLayer],
+          layers: [baseLayer],
           minZoom: 5,
           maxZoom: 11
         });
- 
-        L.control.layers(null, overlayMaps, {collapsed: false}).addTo(map);
+        
+        var heatmap = new pelagios.Heatmap(map, testData.data);
       });
     </script>
   </head>
