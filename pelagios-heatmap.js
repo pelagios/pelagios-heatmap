@@ -61,25 +61,32 @@ pelagios.Heatmap.prototype._addClickHandler = function() {
  */
 pelagios.Heatmap.prototype._onClick = function(event) {
   var self   = this,
-      minLon = event.latlng.lng - 0.05,
-      maxLon = event.latlng.lng + 0.05,
-      minLat = event.latlng.lat - 0.05,
-      maxLat = event.latlng.lat + 0.05,
+      minLon = event.latlng.lng - 0.1,
+      maxLon = event.latlng.lng + 0.1,
+      minLat = event.latlng.lat - 0.1,
+      maxLat = event.latlng.lat + 0.1,
       q      =  minLon + ',' + minLat + ',' + maxLon + ',' + maxLat;
             
   jQuery.getJSON('http://pelagios.dme.ait.ac.at/api/places.json?bbox=' + q, function(data) {
+	console.log(data.length + ' places nearby');
+	
 	// Compute nearest
 	var distances = jQuery.map(data, function(place, idx) {
+		
+	  // TODO handle polygons (reducing coordinates to points)
+	  
 	  var latlng = { lat: place.geometry.coordinates[1],
 		             lng: place.geometry.coordinates[0] }
 	  return { idx: idx, dist: pelagios.Heatmap.util.distanceSq(latlng, event.latlng) }
 	});	  
-	distances.sort(pelagios.Heatmap.util.sortByDistance);
+	distances.sort(function(a, b) { return ((a.dist < b.dist) ? -1 : ((a.dist > b.dist) ? 1 : 0)); })
 	
 	// Open popup for nearest place  
 	var nearestPlace = (distances.length > 0) ? data[distances[0].idx] : undefined;
+	console.log('Nearest: ', nearestPlace);
+	
 	if (nearestPlace)  
-	  self.showPopup({ lat: nearestPlace.geometry.coordinates[1], lng: nearestPlace.geometry.coordinates[0] }); 
+	  self.showPopup({ lat: nearestPlace.geometry.coordinates[1], lng: nearestPlace.geometry.coordinates[0] }, nearestPlace); 
   });
 }
 
@@ -89,7 +96,9 @@ pelagios.Heatmap.prototype._onClick = function(event) {
 pelagios.Heatmap.prototype.showPopup = function(latlng, place) {
   // TODO replace dummy content
   L.popup().setLatLng(latlng)
-   .setContent('<p>Hello world!<br />This is a nice popup.</p>')
+   .setContent('<h3>' + place.label + '</h3><p>' + place.comment + 
+               '</p><p>' + place.number_of_references + 
+               ' references in ' + place.in_number_of_datasets + ' datasets.</p>')
    .openOn(this._map);
 }
 
@@ -97,16 +106,12 @@ pelagios.Heatmap.prototype.showPopup = function(latlng, place) {
  * Utility methods.
  */
 pelagios.Heatmap.util = {
-	
-  sortByDistance : function(a, b) { 
-                     return ((a.dist < b.dist) ? -1 : ((a.dist > b.dist) ? 1 : 0));
-                   },
-                   
-  distanceSq :     function(latlngA, latlngB) {
-                     var dLat = latlngA.lat - latlngB.lat,
-                         dLng = latlngA.lng - latlngB.lng;
+
+  distanceSq : function(latlngA, latlngB) {
+                 var dLat = latlngA.lat - latlngB.lat,
+                     dLng = latlngA.lng - latlngB.lng;
         
-                     return Math.pow(dLat, 2) + Math.pow(dLng, 2);
-                   }
+                 return Math.pow(dLat, 2) + Math.pow(dLng, 2);
+               }
 }
 
