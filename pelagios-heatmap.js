@@ -67,7 +67,7 @@ pelagios.Heatmap.prototype._onClick = function(event) {
       maxLat = event.latlng.lat + 0.1,
       q      =  minLon + ',' + minLat + ',' + maxLon + ',' + maxLat;
             
-  jQuery.getJSON('http://pelagios.dme.ait.ac.at/api/places.json?bbox=' + q, function(data) {
+  jQuery.getJSON('http://pelagios.dme.ait.ac.at/api/places.json?limit=200&bbox=' + q, function(data) {
 	console.log(data.length + ' places nearby');
 	
 	// Compute nearest
@@ -96,9 +96,11 @@ pelagios.Heatmap.prototype._onClick = function(event) {
 pelagios.Heatmap.prototype.showPopup = function(latlng, place) {
   // TODO replace dummy content
   L.popup().setLatLng(latlng)
-   .setContent('<h3>' + place.label + '</h3><p>' + place.comment + 
-               '</p><p>' + place.number_of_references + 
-               ' references in ' + place.in_number_of_datasets + ' datasets.</p>')
+   .setContent('<h2>' + place.label + '</h2>' +
+               '<p><em>' + place.altLabels + '<br/>' + place.coverage + 
+               '</em></p><p>' + place.comment + 
+               '</p><p><a href="' + place.uri + '" target="_blank">' + place.number_of_references + 
+               ' references in ' + place.in_number_of_datasets + ' datasets.</a></p>')
    .openOn(this._map);
 }
 
