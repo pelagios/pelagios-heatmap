@@ -22,11 +22,20 @@ pelagios.Heatmap = function(map, data) {
          
   map.addLayer(heatmapLayer);
   
+  var currentTimer,
+      isDblClick = false;
   map.on('click', function(e) {
-    console.log(e.latlng);
-  });
-  
-  map.on('dblclick', function(e) {
-    console.log('Double!');
+	if (currentTimer) {
+	  clearTimeout(currentTimer);
+      isDblClick = true;	  
+    }
+    	  
+	currentTimer = setTimeout(function() {
+	  if (!isDblClick)
+        console.log('single click');
+
+      currentTimer = undefined;        
+      isDblClick = false;
+    }, 200); 
   });
 }
