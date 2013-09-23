@@ -21,4 +21,12 @@ pelagios.Heatmap = function(map, data) {
   heatmapLayer.addData(testData.data);
          
   map.addLayer(heatmapLayer);
+  
+  map.on('click', function(e) {
+    console.log(e.latlng);
+  });
+  
+  map.on('dblclick', function(e) {
+    console.log('Double!');
+  });
 }
