@@ -22,7 +22,12 @@ pelagios.Heatmap = function(map, data) {
   map.addLayer(heatmapLayer);
   
   // TODO clean up - move utility functions somewhere else for better readability
-  
+  var showPopup = function(latlng) {
+	L.popup().setLatLng(latlng)
+    .setContent('<p>Hello world!<br />This is a nice popup.</p>')
+    .openOn(map);
+  }
+     
   var distanceSq = function(latlngA, latlngB) {
     // Not very elegant but sufficient for the geographical extent we're dealing with
     var dLat = latlngA.lat - latlngB.lat,
@@ -52,7 +57,8 @@ pelagios.Heatmap = function(map, data) {
 	  distances.sort(sortByDistance);
 	  
 	  var nearestPlace = (distances.length > 0) ? data[distances[0].idx] : undefined;
-	  console.log(nearestPlace);
+	  
+	  showPopup({ lat: nearestPlace.geometry.coordinates[1], lng: nearestPlace.geometry.coordinates[0] }); 
 	});
   }
   
