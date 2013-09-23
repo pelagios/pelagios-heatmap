@@ -19,8 +19,42 @@ pelagios.Heatmap = function(map, data) {
   });
   
   heatmapLayer.addData(testData.data);
-         
   map.addLayer(heatmapLayer);
+  
+  // TODO clean up - move utility functions somewhere else for better readability
+  
+  var distanceSq = function(latlngA, latlngB) {
+    // Not very elegant but sufficient for the geographical extent we're dealing with
+    var dLat = latlngA.lat - latlngB.lat,
+        dLng = latlngA.lng - latlngB.lng;
+        
+    return Math.pow(dLat, 2) + Math.pow(dLng, 2);
+  }
+  
+  var sortByDistance = function(a, b) { 
+    return ((a.dist < b.dist) ? -1 : ((a.dist > b.dist) ? 1 : 0));
+  }
+  
+  var handleSingleClick = function(event) {
+    var minLon = event.latlng.lng - 0.05,
+        maxLon = event.latlng.lng + 0.05,
+        minLat = event.latlng.lat - 0.05,
+        maxLat = event.latlng.lat + 0.05,
+        q      =  minLon + ',' + minLat + ',' + maxLon + ',' + maxLat;
+            
+    jQuery.getJSON('http://pelagios.dme.ait.ac.at/api/places.json?bbox=' + q, function(data) {
+	  // Compute nearest
+	  var distances = jQuery.map(data, function(place, idx) {
+		var latlng = { lat: place.geometry.coordinates[1],
+			           lng: place.geometry.coordinates[0] }
+	    return { idx: idx, dist: distanceSq(latlng, event.latlng) }
+	  });	  
+	  distances.sort(sortByDistance);
+	  
+	  var nearestPlace = (distances.length > 0) ? data[distances[0].idx] : undefined;
+	  console.log(nearestPlace);
+	});
+  }
   
   var currentTimer,
       isDblClick = false;
@@ -32,7 +66,7 @@ pelagios.Heatmap = function(map, data) {
     	  
 	currentTimer = setTimeout(function() {
 	  if (!isDblClick)
-        console.log('single click');
+        handleSingleClick(e);
 
       currentTimer = undefined;        
       isDblClick = false;
