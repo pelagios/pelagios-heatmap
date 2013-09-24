@@ -53,7 +53,7 @@ pelagios.Heatmap.prototype._addClickHandler = function() {
 
       currentTimer = undefined;        
       isDblClick = false;
-    }, 200); 
+    }, 500); 
   });
 }
 
@@ -74,6 +74,7 @@ pelagios.Heatmap.prototype._onClick = function(event) {
   
   jQuery.getJSON('http://pelagios.dme.ait.ac.at/api/places.json?limit=200&bbox=' + q, function(data) {
     self._loadIndicator.hide();
+    
 	console.log(data.length + ' places nearby');
 	
 	// Compute nearest
@@ -81,7 +82,7 @@ pelagios.Heatmap.prototype._onClick = function(event) {
 	  var latlng;
 	  
 	  if (place.geometry.type == 'Polygon') {
-	    latlng = pelagios.Heatmap.util.averageCoords(place.geometry.coordinates);
+	    latlng = pelagios.Heatmap.util.averageCoords(place.geometry.coordinates[0]);
 	  } else if (place.geometry.type == 'Point') {	  
         latlng = { lat: place.geometry.coordinates[1], lng: place.geometry.coordinates[0] }
       }
@@ -134,7 +135,7 @@ pelagios.Heatmap.util = {
 					  avgLat += coords[i][1];
 					  avgLon += coords[i][0];
 				    }
-				    
+				     
 				    return { lat: avgLat / j, lng: avgLon / j };
 			      }
 }
