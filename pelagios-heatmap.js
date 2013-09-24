@@ -172,7 +172,12 @@ pelagios.Searchbox.prototype._findPlaces = function(query) {
   });
   
   jQuery.getJSON('http://pelagios.dme.ait.ac.at/api/search.json?query=' + query, function(places) {
-    jQuery.each(places, function(idx, place) {
+    var minLat = 90,
+        minLng = 180,
+        maxLat = -90,
+        maxLng = -180;
+
+    jQuery.each(places, function(idx, place) {	  
 	  if (place.geometry) {
 		var latlng;
         
@@ -183,16 +188,28 @@ pelagios.Searchbox.prototype._findPlaces = function(query) {
         }
         
         if (latlng) {
+          if (latlng.lat < minLat)
+            minLat = latlng.lat;
+
+          if (latlng.lng < minLng)
+            minLng = latlng.lng;
+
+          if (latlng.lat > maxLat)
+            maxLat = latlng.lat;
+
+          if (latlng.lng > maxLng)
+            maxLng = latlng.lng;
+              		  
 		  var marker = L.marker(latlng);
 		  self._results.push(marker);
 		  marker.addTo(self._map);
 		}
 		
 		// TODO make markers clickable
-		
-		// TODO pan/zoom map to markers
 	  }
     });
+    
+	self._map.fitBounds([[minLat, minLng], [maxLat, maxLng]]);
   });
 }
 
@@ -221,4 +238,5 @@ pelagios.Heatmap.util = {
 				     
 				    return { lat: avgLat / j, lng: avgLon / j };
 			      }
+			      
 }
