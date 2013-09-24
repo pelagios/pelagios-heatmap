@@ -45,5 +45,18 @@ p {
   position:absolute;
   top:0px;
   right:0px;
-  background-color:#fff;
+  background-color:rgba(255, 255, 255, 0.8);
+  border-width:0px 0px 1px 1px;
+  border-style:solid;
+  border-color:#ccc;
+  padding:10px;
+}
+
+#search-container input {
+  border:1px solid #ddd;
+  padding:6px;
+  width:180px;
+  background-color:rgba(255, 255, 255, 0.9);
+  outline:none;
+  color:#777;
 }

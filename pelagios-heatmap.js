@@ -42,13 +42,13 @@ pelagios.Heatmap.prototype._addClickHandler = function() {
       isDblClick = false;
       
   this._map.on('click', function(e) {
-	if (currentTimer) {
-	  clearTimeout(currentTimer);
-      isDblClick = true;	  
+    if (currentTimer) {
+      clearTimeout(currentTimer);
+      isDblClick = true;      
     }
-    	  
-	currentTimer = setTimeout(function() {
-	  if (!isDblClick)
+          
+    currentTimer = setTimeout(function() {
+      if (!isDblClick)
         self._onClick(e);
 
       currentTimer = undefined;        
@@ -75,27 +75,27 @@ pelagios.Heatmap.prototype._onClick = function(event) {
   jQuery.getJSON('http://pelagios.dme.ait.ac.at/api/places.json?limit=200&bbox=' + q, function(data) {
     self._loadIndicator.hide();
     
-	console.log(data.length + ' places nearby');
-	
-	// Compute nearest
-	var distances = jQuery.map(data, function(place, idx) {
-	  var latlng;
-	  
-	  if (place.geometry.type == 'Polygon') {
-	    latlng = pelagios.Heatmap.util.averageCoords(place.geometry.coordinates[0]);
-	  } else if (place.geometry.type == 'Point') {	  
+    console.log(data.length + ' places nearby');
+    
+    // Compute nearest
+    var distances = jQuery.map(data, function(place, idx) {
+      var latlng;
+      
+      if (place.geometry.type == 'Polygon') {
+        latlng = pelagios.Heatmap.util.averageCoords(place.geometry.coordinates[0]);
+      } else if (place.geometry.type == 'Point') {    
         latlng = { lat: place.geometry.coordinates[1], lng: place.geometry.coordinates[0] }
       }
       return { idx: idx, dist: pelagios.Heatmap.util.distanceSq(latlng, event.latlng) }
-	});	  
-	
-	if (distances.length > 0) {
-	  distances.sort(function(a, b) { return ((a.dist < b.dist) ? -1 : ((a.dist > b.dist) ? 1 : 0)); })
-	
-	  // Open popup for nearest place  
-	  var nearestPlace = data[distances[0].idx];
-	  self.showPopup({ lat: nearestPlace.geometry.coordinates[1], lng: nearestPlace.geometry.coordinates[0] }, nearestPlace); 
-	}
+    });   
+    
+    if (distances.length > 0) {
+      distances.sort(function(a, b) { return ((a.dist < b.dist) ? -1 : ((a.dist > b.dist) ? 1 : 0)); })
+    
+      // Open popup for nearest place  
+      var nearestPlace = data[distances[0].idx];
+      self.showPopup({ lat: nearestPlace.geometry.coordinates[1], lng: nearestPlace.geometry.coordinates[0] }, nearestPlace); 
+    }
   });
 }
 
@@ -147,7 +147,7 @@ pelagios.Searchbox = function(form, map) {
   var self     = this,
       input    = form.getElementsByTagName('input')[0],
       onSubmit = function(e) {
-		           self._findPlaces(input.value);
+                   self._findPlaces(input.value);
                    e.preventDefault();
                  };
                  
@@ -157,9 +157,9 @@ pelagios.Searchbox = function(form, map) {
   /** @private **/
   this._results = [];
    
-  if (form.addEventListener) {			
+  if (form.addEventListener) {          
     form.addEventListener('submit', onSubmit, false); 
-  } else if (form.attachEvent) {			
+  } else if (form.attachEvent) {            
     form.attachEvent('onsubmit', onSubmit);
   }
 }
@@ -177,13 +177,13 @@ pelagios.Searchbox.prototype._findPlaces = function(query) {
         maxLat = -90,
         maxLng = -180;
 
-    jQuery.each(places, function(idx, place) {	  
-	  if (place.geometry) {
-		var latlng;
+    jQuery.each(places, function(idx, place) {    
+      if (place.geometry) {
+        var latlng;
         
         if (place.geometry.type == 'Polygon') {
-	      latlng = pelagios.Heatmap.util.averageCoords(place.geometry.coordinates[0]);
-	    } else if (place.geometry.type == 'Point') {	  
+          latlng = pelagios.Heatmap.util.averageCoords(place.geometry.coordinates[0]);
+        } else if (place.geometry.type == 'Point') {      
           latlng = { lat: place.geometry.coordinates[1], lng: place.geometry.coordinates[0] }
         }
         
@@ -199,22 +199,23 @@ pelagios.Searchbox.prototype._findPlaces = function(query) {
 
           if (latlng.lng > maxLng)
             maxLng = latlng.lng;
-              		  
-		  var marker = L.marker(latlng);
-		  self._results.push(marker);
-		  marker.addTo(self._map);
-		}
-		
-		// TODO make markers clickable
-	  }
+                      
+          var marker = L.marker(latlng);
+          marker.on('click', function(e) {
+            // TODO show popup   
+          });
+          self._results.push(marker);
+          marker.addTo(self._map);
+        }
+      }
     });
     
-	self._map.fitBounds([[minLat, minLng], [maxLat, maxLng]]);
+    self._map.fitBounds([[minLat, minLng], [maxLat, maxLng]]);
   });
 }
 
 /**
- * Utility methods. Pretty nasty implementation, but does the job for the
+ * Utility methods. Pretty nasty implementations, but do the job for the
  * purposes (and region of the world).
  */
 pelagios.Heatmap.util = {
@@ -227,16 +228,16 @@ pelagios.Heatmap.util = {
                   },
                
   averageCoords : function(coords) {
-	                var avgLat = 0, 
-	                    avgLon = 0,
-	                    j      = coords.length;
-	                  
-	                for (var i=0; i<j; i++) {
-					  avgLat += coords[i][1];
-					  avgLon += coords[i][0];
-				    }
-				     
-				    return { lat: avgLat / j, lng: avgLon / j };
-			      }
-			      
+                    var avgLat = 0, 
+                        avgLon = 0,
+                        j      = coords.length;
+                      
+                    for (var i=0; i<j; i++) {
+                      avgLat += coords[i][1];
+                      avgLon += coords[i][0];
+                    }
+                     
+                    return { lat: avgLat / j, lng: avgLon / j };
+                  }
+                  
 }
