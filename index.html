@@ -28,11 +28,18 @@
         });
         
         var heatmap = new pelagios.Heatmap(map, testData.data);
+        
+        new pelagios.Searchbox(document.getElementById('search'), map);
       });
     </script>
   </head>
 
   <body>
     <div id="map"></div>
+    <div id="search-container">
+	  <form id="search">
+        <input autocomplete="off" placeholder="Find a Place..."/>
+      </form>
+    </div>
   </body>
 </html>

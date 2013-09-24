@@ -114,6 +114,89 @@ pelagios.Heatmap.prototype.showPopup = function(latlng, place) {
 }
 
 /**
+ * The load indicator, backed by a plain old DIV. Will
+ * be hidden after creation.
+ * @constructor
+ */
+pelagios.LoadIndicator = function() {
+  this.element = document.createElement('div');
+  this.element.className = 'pelagios-load-indicator';
+  this.element.style.visibility = 'hidden';
+  document.body.appendChild(this.element);
+}
+
+/**
+ * Shows the load indicator.
+ */
+pelagios.LoadIndicator.prototype.show = function() {
+  this.element.style.visibility = 'visible';
+}
+
+/**
+ * Hides the load indicator.
+ */
+pelagios.LoadIndicator.prototype.hide = function() {
+  this.element.style.visibility = 'hidden';
+}
+
+/**
+ * A Pelagios place search box.
+ * @constructor
+ */
+pelagios.Searchbox = function(form, map) {
+  var self     = this,
+      input    = form.getElementsByTagName('input')[0],
+      onSubmit = function(e) {
+		           self._findPlaces(input.value);
+                   e.preventDefault();
+                 };
+                 
+  /** @private **/
+  this._map = map;
+  
+  /** @private **/
+  this._results = [];
+   
+  if (form.addEventListener) {			
+    form.addEventListener('submit', onSubmit, false); 
+  } else if (form.attachEvent) {			
+    form.attachEvent('onsubmit', onSubmit);
+  }
+}
+
+pelagios.Searchbox.prototype._findPlaces = function(query) {
+  var self = this;
+  
+  jQuery.each(this._results, function(idx, marker) {
+    self._map.removeLayer(marker);
+  });
+  
+  jQuery.getJSON('http://pelagios.dme.ait.ac.at/api/search.json?query=' + query, function(places) {
+    jQuery.each(places, function(idx, place) {
+	  if (place.geometry) {
+		var latlng;
+        
+        if (place.geometry.type == 'Polygon') {
+	      latlng = pelagios.Heatmap.util.averageCoords(place.geometry.coordinates[0]);
+	    } else if (place.geometry.type == 'Point') {	  
+          latlng = { lat: place.geometry.coordinates[1], lng: place.geometry.coordinates[0] }
+        }
+        
+        if (latlng) {
+		  var marker = L.marker(latlng);
+		  self._results.push(marker);
+		  marker.addTo(self._map);
+		}
+		
+		// TODO make markers clickable
+		
+		// TODO pan/zoom map to markers
+	  }
+    });
+  });
+}
+
+/**
  * Utility methods. Pretty nasty implementation, but does the job for the
  * purposes (and region of the world).
  */
@@ -138,19 +221,4 @@ pelagios.Heatmap.util = {
 				     
 				    return { lat: avgLat / j, lng: avgLon / j };
 			      }
-}
-
-pelagios.LoadIndicator = function() {
-  this.element = document.createElement('div');
-  this.element.className = 'pelagios-load-indicator';
-  this.element.style.visibility = 'hidden';
-  document.body.appendChild(this.element);
-}
-
-pelagios.LoadIndicator.prototype.show = function() {
-  this.element.style.visibility = 'visible';
-}
-
-pelagios.LoadIndicator.prototype.hide = function() {
-  this.element.style.visibility = 'hidden';
 }

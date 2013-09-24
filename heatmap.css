@@ -40,3 +40,10 @@ p {
   -khtml-border-radius: 8px;
   border-radius: 8px;
 }
+
+#search-container {
+  position:absolute;
+  top:0px;
+  right:0px;
+  background-color:#fff;
+}
