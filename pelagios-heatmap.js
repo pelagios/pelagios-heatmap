@@ -9,7 +9,7 @@ var pelagios = { }
  */
 pelagios.Heatmap = function(map, data) {
   /** @private **/
-  this._map = map;
+  this.map = map;
   
   /** @private **/
   this._loadIndicator = new pelagios.LoadIndicator();
@@ -41,7 +41,7 @@ pelagios.Heatmap.prototype._addClickHandler = function() {
       currentTimer,
       isDblClick = false;
       
-  this._map.on('click', function(e) {
+  this.map.on('click', function(e) {
     if (currentTimer) {
       clearTimeout(currentTimer);
       isDblClick = true;      
@@ -102,15 +102,20 @@ pelagios.Heatmap.prototype._onClick = function(event) {
 /**
  * Shows a popup with place-specific information at a specific coordinate.
  */
-pelagios.Heatmap.prototype.showPopup = function(latlng, place) {
-  // TODO replace dummy content
-  L.popup().setLatLng(latlng)
-   .setContent('<h2>' + place.label + '</h2>' +
-               '<p><em>' + place.altLabels + '<br/>' + place.coverage + 
-               '</em></p><p>' + place.comment + 
-               '</p><p><a href="' + place.uri + '" target="_blank">' + place.number_of_references + 
-               ' references in ' + place.in_number_of_datasets + ' datasets.</a></p>')
-   .openOn(this._map);
+pelagios.Heatmap.prototype.showPopup = function(markerOrLatlng, place) {
+  var content = '<h2>' + place.label + '</h2>' +
+                     '<p><em>' + place.altLabels + '<br/>' + place.coverage + 
+                     '</em></p><p>' + place.comment + 
+                     '</p><p><a href="' + place.uri + '" target="_blank">' + place.number_of_references + 
+                     ' references in ' + place.in_number_of_datasets + ' datasets.</a></p>' 
+  
+  if (markerOrLatlng.lat && markerOrLatlng.lng) {
+    L.popup().setLatLng(markerOrLatlng)
+     .setContent(content)
+     .openOn(this.map);
+  } else {
+    markerOrLatlng.bindPopup(content).openPopup();
+  }
 }
 
 /**
@@ -136,7 +141,7 @@ pelagios.LoadIndicator.prototype.show = function() {
   this._deferredIndicator = setTimeout(function() {
     self.element.style.visibility = 'visible';
     delete self._deferredIndicator;
-  }, 500); 
+  }, 200); 
 }
 
 /**
@@ -153,7 +158,7 @@ pelagios.LoadIndicator.prototype.hide = function() {
  * A Pelagios place search box.
  * @constructor
  */
-pelagios.Searchbox = function(form, map) {
+pelagios.Searchbox = function(form, heatmap) {
   var self     = this,
       input    = form.getElementsByTagName('input')[0],
       onSubmit = function(e) {
@@ -162,7 +167,7 @@ pelagios.Searchbox = function(form, map) {
                  };
                  
   /** @private **/
-  this._map = map;
+  this._heatmap = heatmap;
   
   /** @private **/
   this._results = [];
@@ -178,7 +183,7 @@ pelagios.Searchbox.prototype._findPlaces = function(query) {
   var self = this;
   
   jQuery.each(this._results, function(idx, marker) {
-    self._map.removeLayer(marker);
+    self._heatmap.map.removeLayer(marker);
   });
   
   jQuery.getJSON('http://pelagios.dme.ait.ac.at/api/search.json?query=' + query, function(places) {
@@ -212,15 +217,15 @@ pelagios.Searchbox.prototype._findPlaces = function(query) {
                       
           var marker = L.marker(latlng);
           marker.on('click', function(e) {
-            // TODO show popup   
+            self._heatmap.showPopup(marker, place);   
           });
           self._results.push(marker);
-          marker.addTo(self._map);
+          marker.addTo(self._heatmap.map);
         }
       }
     });
     
-    self._map.fitBounds([[minLat, minLng], [maxLat, maxLng]]);
+    self._heatmap.map.fitBounds([[minLat, minLng], [maxLat, maxLng]]);
   });
 }
 
