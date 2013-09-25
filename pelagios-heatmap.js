@@ -122,6 +122,9 @@ pelagios.LoadIndicator = function() {
   this.element = document.createElement('div');
   this.element.className = 'pelagios-load-indicator';
   this.element.style.visibility = 'hidden';
+  
+  this._deferredIndicator;
+  
   document.body.appendChild(this.element);
 }
 
@@ -129,13 +132,20 @@ pelagios.LoadIndicator = function() {
  * Shows the load indicator.
  */
 pelagios.LoadIndicator.prototype.show = function() {
-  this.element.style.visibility = 'visible';
+  var self = this;
+  this._deferredIndicator = setTimeout(function() {
+    self.element.style.visibility = 'visible';
+    delete self._deferredIndicator;
+  }, 500); 
 }
 
 /**
  * Hides the load indicator.
  */
 pelagios.LoadIndicator.prototype.hide = function() {
+  if (this._deferredIndicator)
+    clearTimeout(this._deferredIndicator);
+    
   this.element.style.visibility = 'hidden';
 }
 
