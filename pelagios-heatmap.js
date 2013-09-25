@@ -107,7 +107,7 @@ pelagios.Heatmap.prototype.showPopup = function(markerOrLatlng, place) {
                      '<p><em>' + place.altLabels + '<br/>' + place.coverage + 
                      '</em></p><p>' + place.comment + 
                      '</p><p><a href="' + place.uri + '" target="_blank">' + place.number_of_references + 
-                     ' references in ' + place.in_number_of_datasets + ' datasets.</a></p>' 
+                     ' references.</a></p>' 
   
   if (markerOrLatlng.lat && markerOrLatlng.lng) {
     L.popup().setLatLng(markerOrLatlng)
