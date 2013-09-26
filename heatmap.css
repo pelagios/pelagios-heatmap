@@ -60,3 +60,7 @@ p {
   outline:none;
   color:#777;
 }
+
+#search-container input:disabled {
+  color:#ddd;
+}

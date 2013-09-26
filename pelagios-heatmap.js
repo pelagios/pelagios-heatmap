@@ -12,7 +12,7 @@ pelagios.Heatmap = function(map, data) {
   this.map = map;
   
   /** @private **/
-  this._loadIndicator = new pelagios.LoadIndicator();
+  this.loadIndicator = new pelagios.LoadIndicator();
   
   var heatmapLayer = L.TileLayer.heatMap({
           radius: 12,
@@ -70,10 +70,10 @@ pelagios.Heatmap.prototype._onClick = function(event) {
       maxLat = event.latlng.lat + 0.1,
       q      =  minLon + ',' + minLat + ',' + maxLon + ',' + maxLat;
   
-  this._loadIndicator.show();
+  this.loadIndicator.show();
   
   jQuery.getJSON('http://pelagios.dme.ait.ac.at/api/places.json?limit=200&bbox=' + q, function(data) {
-    self._loadIndicator.hide();
+    self.loadIndicator.hide();
     
     console.log(data.length + ' places nearby');
     
@@ -162,7 +162,7 @@ pelagios.Searchbox = function(form, heatmap) {
   var self     = this,
       input    = form.getElementsByTagName('input')[0],
       onSubmit = function(e) {
-                   self._findPlaces(input.value);
+                   self._findPlaces(input);
                    e.preventDefault();
                  };
                  
@@ -179,18 +179,24 @@ pelagios.Searchbox = function(form, heatmap) {
   }
 }
 
-pelagios.Searchbox.prototype._findPlaces = function(query) {
+pelagios.Searchbox.prototype._findPlaces = function(input) {
   var self = this;
   
   jQuery.each(this._results, function(idx, marker) {
     self._heatmap.map.removeLayer(marker);
   });
   
-  jQuery.getJSON('http://pelagios.dme.ait.ac.at/api/search.json?query=' + query, function(places) {
+  input.disabled = true;
+  this._heatmap.loadIndicator.show();
+  
+  jQuery.getJSON('http://pelagios.dme.ait.ac.at/api/search.json?query=' + input.value, function(places) {
     var minLat = 90,
         minLng = 180,
         maxLat = -90,
         maxLng = -180;
+
+    input.disabled = false;
+    self._heatmap.loadIndicator.hide();
 
     jQuery.each(places, function(idx, place) {    
       if (place.geometry) {
